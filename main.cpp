@@ -155,9 +155,10 @@ void test_resize() {
     free(img);
 }
 
+
 int main() {
-    std::cout << "开始测试函数 << my_strlen >> ..." << std::endl;
-    test_strlen();
+	std::cout << "开始测试函数 << my_strlen >> ..." << std::endl;
+	test_strlen();
     std::cout << "开始测试函数 << my_strcat >> ..." << std::endl;
     test_strcat();
     std::cout << "开始测试函数 << my_strstr >> ..." << std::endl;
@@ -168,5 +169,5 @@ int main() {
     test_resize();
     std::cout << "开始测试函数 << hist_eq >> ..." << std::endl;
     test_hist_eq();
-    return 0;
+return 0;
 }

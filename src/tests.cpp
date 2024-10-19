@@ -1,13 +1,20 @@
 #include "tests.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 // 练习1，实现库函数strlen
 int my_strlen(char *str) {
+    //char *str表示的是可修改指针，*str表示的是指针指向的内容
     /**
      * 统计字符串的长度，太简单了。
      */
-
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int length = 0;
+    while (str[length]!= '\0') {
+        length++;
+    }
+    
+    return length;
 }
 
 
@@ -17,8 +24,20 @@ void my_strcat(char *str_1, char *str_2) {
      * 将字符串str_2拼接到str_1之后，我们保证str_1指向的内存空间足够用于添加str_2。
      * 注意结束符'\0'的处理。
      */
-
-    // IMPLEMENT YOUR CODE HERE
+     // 找到str_1的末尾
+     // IMPLEMENT YOUR CODE HERE
+while(*str_1){
+    str_1++;
+}
+ // 将str_2的字符逐个复制到str_1的末尾
+while(*str_2){
+    
+    *str_1++ = *str_2++;
+    
+}
+// 在拼接后的字符串末尾添加结束符'\0'
+*str_1='\0';
+    
 }
 
 
@@ -29,8 +48,39 @@ char* my_strstr(char *s, char *p) {
      * 例如：
      * s = "123456", p = "34"，应该返回指向字符'3'的指针。
      */
-
     // IMPLEMENT YOUR CODE HERE
+if (*p == '\0') {
+        return s;
+    }
+
+    char *s_temp = s;
+    char *p_temp = p;
+    
+    // 遍历主字符串
+    while (*s_temp != '\0') {
+        
+        // 如果当前字符匹配，开始检查子字符串
+        if (*s_temp == *p_temp) {
+            // 指针指向当前字符
+            char *s_temp2 = s_temp;
+            char *p_temp2 = p_temp;
+
+            // 检查子字符串的剩余部分是否匹配
+            while (*s_temp2 != '\0' && *p_temp2 != '\0' && *s_temp2 == *p_temp2) {
+                s_temp2++;
+                p_temp2++;
+            }
+
+            // 如果子字符串已经遍历完，说明找到了匹配的子字符串
+            if (*p_temp2 == '\0') {
+                return s_temp;
+            }
+        }
+        // 移动主字符串的指针
+        s_temp++;
+    }
+
+   
     return 0;
 }
 
@@ -97,6 +147,25 @@ void rgb2gray(float *in, float *out, int h, int w) {
 
     // IMPLEMENT YOUR CODE HERE
     // ...
+for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            // 计算当前像素在输入数组中的索引
+            int index = i * w * 3 + j * 3;
+            // 计算当前像素在输出数组中的索引
+            int out_index = i * w + j;
+
+            // 获取当前像素的RGB值
+            float R = in[index];
+            float G = in[index + 1];
+            float B = in[index + 2];
+
+            // 计算灰度值
+            float V = 0.1140 * B + 0.5870 * G + 0.2989 * R;
+
+            // 将灰度值写入输出数组
+            out[out_index] = V;
+        }
+    }
 }
 
 // 练习5，实现图像处理算法 resize：缩小或放大图像
@@ -199,6 +268,37 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
     int new_h = h * scale, new_w = w * scale;
     // IMPLEMENT YOUR CODE HERE
 
+    for (int i = 0; i < new_h; i++) {
+        for (int j = 0; j < new_w; j++) {
+            // 计算新像素在原图中的坐标
+            float x0 = (float)j / scale;
+            float y0 = (float)i / scale;
+
+            // 找到四个邻居点的坐标
+            int x1 = (int)x0;
+            int y1 = (int)y0;
+            int x2 = (x1 < w - 1) ? x1 + 1 : x1;
+            int y2 = (y1 < h - 1) ? y1 + 1 : y1;
+
+            // 计算距离权重
+            float dx = x0 - x1;
+            float dy = y0 - y1;
+
+            for (int k = 0; k < c; k++) {
+                // 计算插值
+                float p1 = in[(y1 * w + x1) * c + k];
+                float p2 = in[(y1 * w + x2) * c + k];
+                float p3 = in[(y2 * w + x1) * c + k];
+                float p4 = in[(y2 * w + x2) * c + k];
+
+                float Q = p1 * (1 - dx) * (1 - dy) + p2 * dx * (1 - dy) +
+                          p3 * (1 - dx) * dy + p4 * dx * dy;
+
+                // 将计算结果写入输出数组
+                out[(i * new_w + j) * c + k] = Q;
+            }
+        }
+    }
 }
 
 
@@ -221,4 +321,37 @@ void hist_eq(float *in, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+     int histogram[256] = {0};
+    int cumulative[256] = {0};
+    int total_pixels = h * w;
+    int i, level;
+    float* out = (float*)malloc(h * w * sizeof(float)); // 输出图像
+
+    // Step 1: Calculate the histogram
+    for (i = 0; i < total_pixels; i++) {
+        histogram[(int)in[i]]++;
+    }
+
+    // Step 2: Calculate the cumulative histogram
+    cumulative[0] = histogram[0];
+    for (i = 1; i < 256; i++) {
+        cumulative[i] = cumulative[i - 1] + histogram[i];
+    }
+
+    // Step 3: Calculate the mapping function
+    float scale = 255.0 / (float)total_pixels;
+    for (i = 0; i < total_pixels; i++) {
+        level = cumulative[(int)in[i]];
+        if (level == 0) level = 1; // 防止除以0
+        out[i] = (float)(level - 1) * scale;
+    }
+
+    // Step 4: Copy the output image back to the input image
+    for (i = 0; i < total_pixels; i++) {
+        in[i] = out[i];
+    }
+
+    free(out);
 }
+
+
