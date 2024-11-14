@@ -26,18 +26,13 @@ void my_strcat(char *str_1, char *str_2) {
      */
      // 找到str_1的末尾
      // IMPLEMENT YOUR CODE HERE
-while(*str_1){
+while(*str_1!='\0'){
     str_1++;
 }
- // 将str_2的字符逐个复制到str_1的末尾
-while(*str_2){
-    
+while(*str_2!='\0'){
     *str_1++ = *str_2++;
-    
 }
-// 在拼接后的字符串末尾添加结束符'\0'
 *str_1='\0';
-    
 }
 
 
@@ -52,31 +47,20 @@ char* my_strstr(char *s, char *p) {
 if (*p == '\0') {
         return s;
     }
-
     char *s_temp = s;
     char *p_temp = p;
-    
-    // 遍历主字符串
     while (*s_temp != '\0') {
-        
-        // 如果当前字符匹配，开始检查子字符串
         if (*s_temp == *p_temp) {
-            // 指针指向当前字符
             char *s_temp2 = s_temp;
             char *p_temp2 = p_temp;
-
-            // 检查子字符串的剩余部分是否匹配
             while (*s_temp2 != '\0' && *p_temp2 != '\0' && *s_temp2 == *p_temp2) {
                 s_temp2++;
                 p_temp2++;
             }
-
-            // 如果子字符串已经遍历完，说明找到了匹配的子字符串
             if (*p_temp2 == '\0') {
                 return s_temp;
             }
         }
-        // 移动主字符串的指针
         s_temp++;
     }
 
@@ -327,26 +311,23 @@ void hist_eq(float *in, int h, int w) {
     int i, level;
     float* out = (float*)malloc(h * w * sizeof(float)); // 输出图像
 
-    // Step 1: Calculate the histogram
+    //计算累积直方图
     for (i = 0; i < total_pixels; i++) {
         histogram[(int)in[i]]++;
     }
 
-    // Step 2: Calculate the cumulative histogram
+    // 计算映射函数
     cumulative[0] = histogram[0];
     for (i = 1; i < 256; i++) {
         cumulative[i] = cumulative[i - 1] + histogram[i];
-    }
-
-    // Step 3: Calculate the mapping function
+    } 
     float scale = 255.0 / (float)total_pixels;
     for (i = 0; i < total_pixels; i++) {
         level = cumulative[(int)in[i]];
         if (level == 0) level = 1; // 防止除以0
         out[i] = (float)(level - 1) * scale;
     }
-
-    // Step 4: Copy the output image back to the input image
+    // 将输出图像复制回输入图像 
     for (i = 0; i < total_pixels; i++) {
         in[i] = out[i];
     }
